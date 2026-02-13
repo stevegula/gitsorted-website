@@ -1,0 +1,41 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = 'Task lists, shopping lists, and notes backed by git. Your data, your device, your repos.' } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/png" href="/icon.png" />
+    <title>{title}</title>
+  </head>
+  <body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col">
+    <nav class="border-b border-gray-800 px-6 py-4">
+      <div class="max-w-4xl mx-auto flex items-center justify-between">
+        <a href="/" class="text-lg font-semibold text-white">GitSorted</a>
+        <div class="flex gap-6 text-sm text-gray-400">
+          <a href="/privacy" class="hover:text-white transition-colors">Privacy</a>
+          <a href="/terms" class="hover:text-white transition-colors">Terms</a>
+          <a href="/support" class="hover:text-white transition-colors">Support</a>
+        </div>
+      </div>
+    </nav>
+
+    <main class="flex-1">
+      <slot />
+    </main>
+
+    <footer class="border-t border-gray-800 px-6 py-6 text-center text-sm text-gray-500">
+      &copy; {new Date().getFullYear()} Goshen Cloud Consulting. All rights reserved.
+    </footer>
+  </body>
+</html>
