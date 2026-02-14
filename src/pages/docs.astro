@@ -11,7 +11,8 @@ const repoStructure = `<repo>/
 
 const metadataExample = `{
   "projectType": "todo" | "shopping" | "notes" | "generic",
-  "labels": ["bug", "feature", "urgent"]
+  "labels": ["bug", "feature", "urgent"],
+  "conflictStrategy": "last-write-wins" | "remote-wins" | "local-wins"
 }`;
 
 const taskExample = `{
@@ -64,7 +65,10 @@ const llmContract = `# GitSorted Repository Contract
 - reminders: string[] (ISO 8601 array, todo projects only)
 
 ## Conflict resolution
-- Item files: last-write-wins by updatedAt
+- Item files: determined by metadata.json conflictStrategy
+  - "last-write-wins" (default): compare updatedAt timestamps
+  - "remote-wins": always keep remote version
+  - "local-wins": always keep local version
 - metadata.json: labels are union-merged
 - Delete vs edit: edit always wins
 
@@ -124,6 +128,12 @@ const llmContract = `# GitSorted Repository Contract
                 <td class="px-4 py-2 text-gray-400">string[]</td>
                 <td class="px-4 py-2 text-gray-400">no</td>
                 <td class="px-4 py-2 text-gray-400">Canonical list of all label names available in this project. Defaults to [].</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">conflictStrategy</td>
+                <td class="px-4 py-2 text-gray-400">string</td>
+                <td class="px-4 py-2 text-gray-400">no</td>
+                <td class="px-4 py-2 text-gray-400">Item conflict resolution strategy: <code class="text-gray-300">last-write-wins</code> (default), <code class="text-gray-300">remote-wins</code>, or <code class="text-gray-300">local-wins</code>. Only affects item files — metadata merge and delete-vs-edit rules are unchanged.</td>
               </tr>
             </tbody>
           </table>
@@ -304,7 +314,13 @@ const llmContract = `# GitSorted Repository Contract
             <h4 class="font-medium text-white mb-2">Both sides modified the same file</h4>
             <p class="text-gray-400 text-sm mb-3">When the same file was edited on both the local device and the remote:</p>
             <ul class="space-y-2 text-gray-400 text-sm">
-              <li><strong class="text-gray-300">Item files (items/*.json)</strong> — <strong class="text-white">Last-write-wins.</strong> The version with the later <code class="text-gray-300">updatedAt</code> timestamp is kept. The other is discarded.</li>
+              <li><strong class="text-gray-300">Item files (items/*.json)</strong> — Resolved using the <code class="text-gray-300">conflictStrategy</code> set in <code class="text-gray-300">metadata.json</code>:
+                <ul class="mt-1 ml-4 space-y-1">
+                  <li><code class="text-gray-300">last-write-wins</code> (default) — The version with the later <code class="text-gray-300">updatedAt</code> timestamp is kept.</li>
+                  <li><code class="text-gray-300">remote-wins</code> — The remote version is always kept.</li>
+                  <li><code class="text-gray-300">local-wins</code> — The local version is always kept.</li>
+                </ul>
+              </li>
               <li><strong class="text-gray-300">Metadata (metadata.json)</strong> — <strong class="text-white">Union merge.</strong> Labels from both sides are combined and deduplicated. The <code class="text-gray-300">projectType</code> from the remote side is used.</li>
             </ul>
           </div>
