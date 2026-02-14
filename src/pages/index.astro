@@ -1,8 +1,41 @@
 ---
 import Base from '../layouts/Base.astro';
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "GitSorted",
+  "operatingSystem": "iOS",
+  "applicationCategory": "UtilitiesApplication",
+  "description": "Task lists, shopping lists, and notes backed by git. Your data, your device, your repos.",
+  "offers": [
+    {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD",
+      "name": "Free"
+    },
+    {
+      "@type": "Offer",
+      "price": "4.99",
+      "priceCurrency": "USD",
+      "name": "Pro (one-time)"
+    }
+  ],
+  "featureList": [
+    "Git-backed local storage",
+    "Sync to GitHub, GitLab, Bitbucket, Gitea, Azure Repos, AWS CodeCommit",
+    "Task lists with priorities, deadlines, and labels",
+    "Shopping lists",
+    "Notes",
+    "36 languages",
+    "Dark mode and light mode"
+  ]
+};
 ---
 
 <Base title="GitSorted — Git-backed lists and notes">
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   <div class="max-w-4xl mx-auto px-6 py-20">
     <section class="text-center mb-20">
       <h1 class="text-5xl font-bold tracking-tight text-white mb-6">
@@ -21,22 +54,25 @@ import Base from '../layouts/Base.astro';
       </div>
     </section>
 
-    <section class="grid md:grid-cols-2 gap-8 mb-20">
-      <div class="bg-gray-900 rounded-xl p-6 border border-gray-800">
-        <h3 class="text-lg font-semibold text-white mb-2">Your data is yours</h3>
-        <p class="text-gray-400">Every list is a git repo on your device. Items are plain JSON files you can read, copy, or back up however you want.</p>
-      </div>
-      <div class="bg-gray-900 rounded-xl p-6 border border-gray-800">
-        <h3 class="text-lg font-semibold text-white mb-2">Sync to any git remote</h3>
-        <p class="text-gray-400">GitHub, GitLab, Bitbucket, Gitea, Azure Repos, AWS CodeCommit, or your own self-hosted server. Your choice.</p>
-      </div>
-      <div class="bg-gray-900 rounded-xl p-6 border border-gray-800">
-        <h3 class="text-lg font-semibold text-white mb-2">Task lists with priorities</h3>
-        <p class="text-gray-400">Organize tasks with five priority levels, custom labels, deadlines, notes, and URLs. Sort and filter to focus on what matters.</p>
-      </div>
-      <div class="bg-gray-900 rounded-xl p-6 border border-gray-800">
-        <h3 class="text-lg font-semibold text-white mb-2">Shopping lists and notes</h3>
-        <p class="text-gray-400">Quick check-off shopping lists and simple notes. All stored the same way &mdash; as git-tracked files on your device.</p>
+    <section class="mb-20">
+      <h2 class="sr-only">Features</h2>
+      <div class="grid md:grid-cols-2 gap-8">
+        <div class="bg-gray-900 rounded-xl p-6 border border-gray-800">
+          <h3 class="text-lg font-semibold text-white mb-2">Your data is yours</h3>
+          <p class="text-gray-400">Every list is a git repo on your device. Items are plain JSON files you can read, copy, or back up however you want.</p>
+        </div>
+        <div class="bg-gray-900 rounded-xl p-6 border border-gray-800">
+          <h3 class="text-lg font-semibold text-white mb-2">Sync to any git remote</h3>
+          <p class="text-gray-400">GitHub, GitLab, Bitbucket, Gitea, Azure Repos, AWS CodeCommit, or your own self-hosted server. Your choice.</p>
+        </div>
+        <div class="bg-gray-900 rounded-xl p-6 border border-gray-800">
+          <h3 class="text-lg font-semibold text-white mb-2">Task lists with priorities</h3>
+          <p class="text-gray-400">Organize tasks with five priority levels, custom labels, deadlines, notes, and URLs. Sort and filter to focus on what matters.</p>
+        </div>
+        <div class="bg-gray-900 rounded-xl p-6 border border-gray-800">
+          <h3 class="text-lg font-semibold text-white mb-2">Shopping lists and notes</h3>
+          <p class="text-gray-400">Quick check-off shopping lists and simple notes. All stored the same way &mdash; as git-tracked files on your device.</p>
+        </div>
       </div>
     </section>
 

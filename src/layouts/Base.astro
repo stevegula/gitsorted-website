@@ -7,6 +7,7 @@ interface Props {
 }
 
 const { title, description = 'Task lists, shopping lists, and notes backed by git. Your data, your device, your repos.' } = Astro.props;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 ---
 
 <!doctype html>
@@ -15,7 +16,11 @@ const { title, description = 'Task lists, shopping lists, and notes backed by gi
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
-    <link rel="icon" type="image/png" href="/icon.png" />
+    <link rel="canonical" href={canonicalURL.href} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="apple-itunes-app" content="app-id=XXXXXXXXXX" />
     <title>{title}</title>
   </head>
   <body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col">
