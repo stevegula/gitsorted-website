@@ -27,6 +27,7 @@ User-agent: *
 Content-Signal: search=yes,ai-train=no
 Allow: /
 Sitemap: https://gitsorted.app/sitemap-index.xml
+LLMs-Txt: https://gitsorted.app/llms.txt
 
 User-agent: Amazonbot
 Disallow: /

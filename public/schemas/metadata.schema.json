@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gitsorted.app/schemas/metadata.schema.json",
+  "title": "GitSorted Project Metadata",
+  "description": "Project metadata stored at the root of a GitSorted repository (metadata.json).",
+  "type": "object",
+  "required": ["projectType"],
+  "properties": {
+    "projectType": {
+      "type": "string",
+      "enum": ["todo", "shopping", "notes", "generic"],
+      "description": "The type of project, which determines which item schema applies."
+    },
+    "labels": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true,
+      "description": "Canonical list of all label names available in this project."
+    },
+    "conflictStrategy": {
+      "type": "string",
+      "enum": ["last-write-wins", "remote-wins", "local-wins"],
+      "default": "last-write-wins",
+      "description": "How item file conflicts are resolved during sync."
+    }
+  },
+  "additionalProperties": false
+}

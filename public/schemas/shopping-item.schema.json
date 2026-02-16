@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gitsorted.app/schemas/shopping-item.schema.json",
+  "title": "GitSorted Shopping Item",
+  "description": "A shopping item stored in a GitSorted shopping project (items/<uuid>.json).",
+  "type": "object",
+  "required": ["id", "createdAt", "updatedAt", "completed", "shortDescription", "listOrder"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "UUID v4 identifier. Must match the filename without .json."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp. Set once at creation, never changed."
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp. Updated on every mutation."
+    },
+    "completed": {
+      "type": "boolean",
+      "description": "Whether the item has been purchased/checked off."
+    },
+    "completedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp. Set when completed becomes true."
+    },
+    "shortDescription": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The item name."
+    },
+    "listOrder": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Sort position in the list. Lower values appear first."
+    },
+    "priority": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "critical"],
+      "description": "Priority level."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Freeform text content."
+    },
+    "labels": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true,
+      "description": "Tags assigned to this item."
+    },
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "A related URL."
+    }
+  },
+  "additionalProperties": false
+}

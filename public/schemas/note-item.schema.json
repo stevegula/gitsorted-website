@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gitsorted.app/schemas/note-item.schema.json",
+  "title": "GitSorted Note Item",
+  "description": "A note item stored in a GitSorted notes project (items/<uuid>.json).",
+  "type": "object",
+  "required": ["id", "createdAt", "updatedAt", "listOrder"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "UUID v4 identifier. Must match the filename without .json."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp. Set once at creation, never changed."
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp. Updated on every mutation."
+    },
+    "listOrder": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Sort position in the list. Lower values appear first."
+    },
+    "title": {
+      "type": "string",
+      "description": "Note title."
+    },
+    "body": {
+      "type": "string",
+      "description": "Markdown content of the note."
+    },
+    "labels": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true,
+      "description": "Tags assigned to this note."
+    }
+  },
+  "additionalProperties": false
+}

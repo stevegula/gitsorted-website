@@ -1,0 +1,262 @@
+# GitSorted — Full LLM Reference
+
+> Task lists, shopping lists, and notes backed by git.
+
+GitSorted is a mobile app (iOS/Android) that stores data as plain JSON files inside standard git repositories on the user's device. Each list is a standalone git repo that can optionally sync to any HTTPS git remote (GitHub, GitLab, Bitbucket, Gitea, Azure Repos, AWS CodeCommit, or self-hosted).
+
+This document is the complete reference for LLMs and automated tools interacting with GitSorted repositories.
+
+---
+
+## Repository Structure
+
+Each list is a git repo with this layout:
+
+```
+<repo>/
+├── .git/               # Standard git internals
+├── metadata.json       # Project metadata (type, labels, conflict strategy)
+└── items/
+    ├── <uuid>.json     # One JSON file per item
+    ├── <uuid>.json
+    └── ...
+```
+
+Rules:
+- Items are stored as flat files in `items/`, named `<uuid-v4>.json`
+- No nested directories inside `items/`
+- Default branch: `main`
+- The app only syncs a single branch per repository
+
+---
+
+## metadata.json
+
+The metadata file at the repository root describes the project configuration.
+
+```json
+{
+  "projectType": "todo",
+  "labels": ["bug", "feature", "urgent"],
+  "conflictStrategy": "last-write-wins"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| projectType | string | yes | One of `todo`, `shopping`, `notes`, or `generic` |
+| labels | string[] | no | Canonical list of all label names. Defaults to [] |
+| conflictStrategy | string | no | `last-write-wins` (default), `remote-wins`, or `local-wins` |
+
+JSON Schema: https://gitsorted.app/schemas/metadata.schema.json
+
+---
+
+## Item Types
+
+### Task Item (projectType: "todo")
+
+Full-featured items with priorities, deadlines, reminders, labels, and notes.
+
+```json
+{
+  "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "createdAt": "2026-01-15T10:00:00.000Z",
+  "updatedAt": "2026-01-15T14:30:00.000Z",
+  "completed": false,
+  "shortDescription": "Buy groceries",
+  "listOrder": 2,
+  "priority": "medium",
+  "deadline": "2026-01-16T17:00:00.000Z",
+  "reminders": ["1d", "1h", "0"],
+  "notes": "Check the pantry before going",
+  "labels": ["errands"],
+  "url": "https://example.com"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| id | string | yes | UUID v4. Must match filename without .json |
+| createdAt | string | yes | ISO 8601. Set once at creation, never changed |
+| updatedAt | string | yes | ISO 8601. Updated on every mutation |
+| completed | boolean | yes | Whether the item is done |
+| shortDescription | string | yes | The item's title or brief summary |
+| listOrder | number | yes | Sort position (lower = earlier). Must be >= 0 |
+| completedAt | string | no | ISO 8601. Set when completed becomes true |
+| priority | string | no | `low`, `medium`, `high`, or `critical` |
+| deadline | string | no | ISO 8601 timestamp for the due date |
+| reminders | string[] | no | Deadline-relative offset codes (see below) |
+| notes | string | no | Freeform text content |
+| labels | string[] | no | Tags. Each should exist in metadata.json labels |
+| url | string | no | A related URL |
+
+#### Reminder offset codes
+
+Reminders are stored as offset codes relative to the deadline, NOT as absolute timestamps:
+
+| Code | Meaning | Milliseconds before deadline |
+|------|---------|------------------------------|
+| `"0"` | At deadline | 0 |
+| `"15m"` | 15 minutes before | 900,000 |
+| `"1h"` | 1 hour before | 3,600,000 |
+| `"1d"` | 1 day before | 86,400,000 |
+| `"1w"` | 1 week before | 604,800,000 |
+
+The app computes notification trigger times as `deadline - offset`. Reminders require a deadline to be set; if the deadline is cleared, reminders are also cleared.
+
+JSON Schema: https://gitsorted.app/schemas/task-item.schema.json
+
+### Shopping Item (projectType: "shopping")
+
+Simpler items for shopping lists. No deadline or reminders.
+
+```json
+{
+  "id": "f9e8d7c6-b5a4-3210-fedc-ba0987654321",
+  "createdAt": "2026-02-01T08:00:00.000Z",
+  "updatedAt": "2026-02-01T08:00:00.000Z",
+  "completed": true,
+  "completedAt": "2026-02-01T09:15:00.000Z",
+  "shortDescription": "Milk (2%)",
+  "listOrder": 0,
+  "labels": ["dairy"]
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| id | string | yes | UUID v4 |
+| createdAt | string | yes | ISO 8601 |
+| updatedAt | string | yes | ISO 8601 |
+| completed | boolean | yes | Whether purchased/checked off |
+| shortDescription | string | yes | Item name |
+| listOrder | number | yes | Sort position |
+| completedAt | string | no | ISO 8601 |
+| priority | string | no | `low`, `medium`, `high`, or `critical` |
+| notes | string | no | Freeform text |
+| labels | string[] | no | Tags |
+| url | string | no | Related URL |
+
+JSON Schema: https://gitsorted.app/schemas/shopping-item.schema.json
+
+### Note Item (projectType: "notes")
+
+Markdown-based notes. No completed/priority/deadline fields.
+
+```json
+{
+  "id": "11223344-5566-7788-99aa-bbccddeeff00",
+  "createdAt": "2026-03-01T12:00:00.000Z",
+  "updatedAt": "2026-03-01T15:45:00.000Z",
+  "listOrder": 0,
+  "title": "Meeting Notes",
+  "body": "# Sprint Planning\n\n- Discussed roadmap\n- Assigned tasks",
+  "labels": ["work"]
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| id | string | yes | UUID v4 |
+| createdAt | string | yes | ISO 8601 |
+| updatedAt | string | yes | ISO 8601 |
+| listOrder | number | yes | Sort position |
+| title | string | no | Note title |
+| body | string | no | Markdown content |
+| labels | string[] | no | Tags |
+
+JSON Schema: https://gitsorted.app/schemas/note-item.schema.json
+
+---
+
+## Working With GitSorted Repos
+
+### Creating items
+1. Generate a UUID v4 (e.g. `a1b2c3d4-e5f6-7890-abcd-ef1234567890`)
+2. Create `items/<uuid>.json` with all required fields
+3. Set `id` to match the filename (without `.json`)
+4. Set `createdAt` and `updatedAt` to the current ISO 8601 time
+5. Set `listOrder` to max existing listOrder + 1
+6. Commit with any message (prefix with `GitSorted:` to match convention)
+7. Push
+
+### Editing items
+1. Read the existing JSON file
+2. Modify desired fields
+3. Update `updatedAt` to the current ISO 8601 time
+4. If setting `completed: true`, also set `completedAt` to current time
+5. Commit and push
+
+### Deleting items
+1. Delete the JSON file from `items/`
+2. Commit and push
+3. Note: if the app edited the item since your last sync, the edit-wins strategy will restore it
+
+### Adding labels
+1. Read `metadata.json`
+2. Add the new label string to the `labels` array
+3. Commit and push
+4. The app union-merges labels on sync, so there's no risk of losing labels
+
+### Bulk operations
+For adding many items at once, create all JSON files, then make a single commit. The app will pick up all new items on the next sync.
+
+---
+
+## Conflict Resolution
+
+### Item files (items/*.json)
+Resolved using the `conflictStrategy` in metadata.json:
+- **last-write-wins** (default): compare `updatedAt` timestamps; the later one wins
+- **remote-wins**: always keep the remote version
+- **local-wins**: always keep the local version
+
+### metadata.json
+- `labels`: union-merged (all labels from both sides are kept)
+- `projectType`: remote value is used
+
+### Delete vs edit
+Edit always wins. If one side deletes an item and the other edits it, the edited version is kept. Content preservation takes priority.
+
+### Non-item files
+Standard git merge behavior.
+
+---
+
+## Commit Conventions
+
+All app auto-commits are prefixed with `GitSorted:`:
+- `GitSorted: update N file(s)` — standard item changes
+- `GitSorted: merge resolved` — after automatic conflict resolution
+
+The app ignores commit messages entirely; only file content matters. You can make your own commits with any message format.
+
+---
+
+## Supported Git Providers
+
+GitHub, GitLab, Bitbucket, Gitea, Azure Repos, AWS CodeCommit, and any self-hosted HTTPS git server. Authentication uses Personal Access Tokens stored in the device's secure storage.
+
+---
+
+## App Features
+
+- **Task lists**: priorities (low/medium/high/critical), deadlines, deadline-relative reminders with push notifications, custom labels, notes, URLs, sort by priority/date/deadline
+- **Shopping lists**: quick check-off items with optional priorities and labels
+- **Notes**: markdown editor with live preview, toolbar (bold, italic, headings, lists, links), auto-save
+- **Sync**: automatic push (15s debounce) and pull (on launch/foreground/manual), per-project conflict resolution
+- **Theme**: light mode, dark mode, and system-follow
+- **Languages**: 36 languages
+- **Pro**: unlimited lists, items, and credentials ($4.99 one-time)
+
+---
+
+## Links
+
+- Website: https://gitsorted.app
+- Technical docs: https://gitsorted.app/docs
+- JSON Schemas: https://gitsorted.app/schemas/
+- Support: https://gitsorted.app/support
+- Privacy: https://gitsorted.app/privacy
+- Terms: https://gitsorted.app/terms

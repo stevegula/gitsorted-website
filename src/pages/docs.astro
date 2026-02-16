@@ -24,9 +24,20 @@ const taskExample = `{
   "listOrder": 2,
   "priority": "medium",
   "deadline": "2026-01-16T17:00:00.000Z",
+  "reminders": ["1d", "1h", "0"],
   "notes": "Check the pantry before going",
   "labels": ["errands"],
   "url": null
+}`;
+
+const noteExample = `{
+  "id": "11223344-5566-7788-99aa-bbccddeeff00",
+  "createdAt": "2026-03-01T12:00:00.000Z",
+  "updatedAt": "2026-03-01T15:45:00.000Z",
+  "listOrder": 0,
+  "title": "Meeting Notes",
+  "body": "# Sprint Planning\\n\\n- Discussed roadmap\\n- Assigned tasks",
+  "labels": ["work"]
 }`;
 
 const shoppingExample = `{
@@ -62,7 +73,12 @@ const llmContract = `# GitSorted Repository Contract
 - labels: string[] (must exist in metadata.json labels)
 - url: string
 - deadline: string (ISO 8601, todo projects only)
-- reminders: string[] (ISO 8601 array, todo projects only)
+- reminders: string[] (offset codes: "0", "15m", "1h", "1d", "1w", todo projects only)
+
+## Note items (notes projects only)
+- Required: id, createdAt, updatedAt, listOrder
+- Optional: title, body (markdown), labels
+- Note items do NOT have completed, shortDescription, priority, or deadline
 
 ## Conflict resolution
 - Item files: determined by metadata.json conflictStrategy
@@ -250,7 +266,7 @@ const llmContract = `# GitSorted Repository Contract
                 <td class="px-4 py-2 font-mono text-gray-300">reminders</td>
                 <td class="px-4 py-2 text-gray-400">string[]</td>
                 <td class="px-4 py-2 text-gray-400">no</td>
-                <td class="px-4 py-2 text-gray-400">Array of ISO 8601 timestamps for reminder notifications.</td>
+                <td class="px-4 py-2 text-gray-400">Deadline-relative reminder offset codes. Valid values: <code class="text-gray-300">"0"</code> (at deadline), <code class="text-gray-300">"15m"</code> (15 min before), <code class="text-gray-300">"1h"</code> (1 hour before), <code class="text-gray-300">"1d"</code> (1 day before), <code class="text-gray-300">"1w"</code> (1 week before). Requires a deadline.</td>
               </tr>
             </tbody>
           </table>
@@ -261,6 +277,77 @@ const llmContract = `# GitSorted Repository Contract
 
         <h3 class="text-lg font-medium text-white mt-8 mb-3">Example: shopping item</h3>
         <pre class="bg-gray-900 border border-gray-800 rounded-lg p-4 text-sm overflow-x-auto"><code class="text-gray-300">{shoppingExample}</code></pre>
+
+        <h3 class="text-lg font-medium text-white mt-8 mb-3">Note items</h3>
+        <p class="text-gray-400 text-sm mb-3">Note items (in <code class="text-gray-300">notes</code> projects) have a different schema. They do <strong class="text-white">not</strong> have <code class="text-gray-300">completed</code>, <code class="text-gray-300">shortDescription</code>, <code class="text-gray-300">priority</code>, or <code class="text-gray-300">deadline</code> fields.</p>
+        <div class="overflow-x-auto mb-4">
+          <table class="w-full text-sm border border-gray-800 rounded-lg">
+            <thead>
+              <tr class="bg-gray-900 text-left text-gray-400">
+                <th class="px-4 py-2 border-b border-gray-800">Field</th>
+                <th class="px-4 py-2 border-b border-gray-800">Type</th>
+                <th class="px-4 py-2 border-b border-gray-800">Required</th>
+                <th class="px-4 py-2 border-b border-gray-800">Description</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-800/50">
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">id</td>
+                <td class="px-4 py-2 text-gray-400">string</td>
+                <td class="px-4 py-2 text-gray-400">yes</td>
+                <td class="px-4 py-2 text-gray-400">UUID v4. Matches the filename.</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">createdAt</td>
+                <td class="px-4 py-2 text-gray-400">string</td>
+                <td class="px-4 py-2 text-gray-400">yes</td>
+                <td class="px-4 py-2 text-gray-400">ISO 8601 timestamp.</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">updatedAt</td>
+                <td class="px-4 py-2 text-gray-400">string</td>
+                <td class="px-4 py-2 text-gray-400">yes</td>
+                <td class="px-4 py-2 text-gray-400">ISO 8601 timestamp.</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">listOrder</td>
+                <td class="px-4 py-2 text-gray-400">number</td>
+                <td class="px-4 py-2 text-gray-400">yes</td>
+                <td class="px-4 py-2 text-gray-400">Sort position.</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">title</td>
+                <td class="px-4 py-2 text-gray-400">string</td>
+                <td class="px-4 py-2 text-gray-400">no</td>
+                <td class="px-4 py-2 text-gray-400">Note title.</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">body</td>
+                <td class="px-4 py-2 text-gray-400">string</td>
+                <td class="px-4 py-2 text-gray-400">no</td>
+                <td class="px-4 py-2 text-gray-400">Markdown content.</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">labels</td>
+                <td class="px-4 py-2 text-gray-400">string[]</td>
+                <td class="px-4 py-2 text-gray-400">no</td>
+                <td class="px-4 py-2 text-gray-400">Tags assigned to this note.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="text-lg font-medium text-white mt-8 mb-3">Example: note item</h3>
+        <pre class="bg-gray-900 border border-gray-800 rounded-lg p-4 text-sm overflow-x-auto"><code class="text-gray-300">{noteExample}</code></pre>
+
+        <h3 class="text-lg font-medium text-white mt-8 mb-3">JSON Schemas</h3>
+        <p class="text-gray-400 text-sm mb-3">Formal JSON Schema definitions are available for validation and tooling:</p>
+        <ul class="space-y-2 text-gray-400 text-sm">
+          <li><a href="/schemas/task-item.schema.json" class="text-blue-400 hover:text-blue-300">task-item.schema.json</a> — Task items (todo projects)</li>
+          <li><a href="/schemas/shopping-item.schema.json" class="text-blue-400 hover:text-blue-300">shopping-item.schema.json</a> — Shopping items</li>
+          <li><a href="/schemas/note-item.schema.json" class="text-blue-400 hover:text-blue-300">note-item.schema.json</a> — Note items</li>
+          <li><a href="/schemas/metadata.schema.json" class="text-blue-400 hover:text-blue-300">metadata.schema.json</a> — Project metadata</li>
+        </ul>
       </section>
 
       <!-- Git Commit Conventions -->

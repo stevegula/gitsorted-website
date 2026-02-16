@@ -1,0 +1,89 @@
+# GitSorted
+
+> Task lists, shopping lists, and notes backed by git.
+
+GitSorted is a mobile app (iOS/Android) that stores data as plain JSON files inside standard git repositories on the user's device. Each list is a standalone git repo that can optionally sync to any HTTPS git remote (GitHub, GitLab, Bitbucket, Gitea, Azure Repos, AWS CodeCommit, or self-hosted).
+
+## Repository Structure
+
+Each list is a git repo with this layout:
+
+```
+<repo>/
+├── metadata.json       # Project metadata (type, labels, conflict strategy)
+└── items/
+    ├── <uuid>.json     # One JSON file per item
+    └── ...
+```
+
+- Items live in `items/` as flat files named `<uuid-v4>.json`
+- No nested directories inside `items/`
+- Default branch: `main`
+
+## Item Types
+
+### Task Item (projectType: "todo")
+
+Required fields: `id` (UUID v4), `createdAt` (ISO 8601), `updatedAt` (ISO 8601), `completed` (boolean), `shortDescription` (string), `listOrder` (number).
+
+Optional fields: `completedAt` (ISO 8601), `priority` ("low" | "medium" | "high" | "critical"), `deadline` (ISO 8601), `reminders` (string array of offset codes: "0", "15m", "1h", "1d", "1w"), `notes` (string), `labels` (string array), `url` (string).
+
+Reminders are deadline-relative offsets, not absolute timestamps. The app computes notification times as `deadline - offset`.
+
+JSON Schema: https://gitsorted.app/schemas/task-item.schema.json
+
+### Shopping Item (projectType: "shopping")
+
+Required fields: `id`, `createdAt`, `updatedAt`, `completed`, `shortDescription`, `listOrder`.
+
+Optional fields: `completedAt`, `priority`, `notes`, `labels`, `url`.
+
+JSON Schema: https://gitsorted.app/schemas/shopping-item.schema.json
+
+### Note Item (projectType: "notes")
+
+Required fields: `id`, `createdAt`, `updatedAt`, `listOrder`.
+
+Optional fields: `title` (string), `body` (string, markdown), `labels` (string array).
+
+Note items do NOT have `completed`, `shortDescription`, `priority`, or `deadline` fields.
+
+JSON Schema: https://gitsorted.app/schemas/note-item.schema.json
+
+## metadata.json
+
+Required: `projectType` ("todo" | "shopping" | "notes" | "generic").
+
+Optional: `labels` (string array), `conflictStrategy` ("last-write-wins" | "remote-wins" | "local-wins").
+
+JSON Schema: https://gitsorted.app/schemas/metadata.schema.json
+
+## Working With GitSorted Repos
+
+### Creating items
+Create a JSON file in `items/` with a UUID v4 filename (e.g. `items/a1b2c3d4-e5f6-7890-abcd-ef1234567890.json`). The `id` field must match the filename without `.json`. Set `createdAt` and `updatedAt` to the current ISO 8601 time. Commit and push.
+
+### Editing items
+Modify the JSON file. Always update `updatedAt` to the current time so conflict resolution favors your edit.
+
+### Deleting items
+Delete the JSON file, commit, and push. If the app edited the same item since your last sync, the edit-wins strategy will restore it.
+
+### Adding labels
+Add the label string to `metadata.json`'s `labels` array. The app union-merges labels on sync.
+
+## Conflict Resolution
+
+- **Item files**: resolved by `conflictStrategy` in metadata.json. Default `last-write-wins` compares `updatedAt` timestamps.
+- **metadata.json**: labels are union-merged; projectType uses the remote value.
+- **Delete vs edit**: edit always wins (content preservation).
+
+## Commit Conventions
+
+All auto-commits are prefixed with `GitSorted:`. The app ignores commit messages; only file content matters. You can make your own commits freely.
+
+## Docs
+
+- Technical documentation: https://gitsorted.app/docs
+- JSON Schemas: https://gitsorted.app/schemas/
+- Support: https://gitsorted.app/support

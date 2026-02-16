@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gitsorted.app/schemas/task-item.schema.json",
+  "title": "GitSorted Task Item",
+  "description": "A task item stored in a GitSorted todo project (items/<uuid>.json).",
+  "type": "object",
+  "required": ["id", "createdAt", "updatedAt", "completed", "shortDescription", "listOrder"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "UUID v4 identifier. Must match the filename without .json."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp. Set once at creation, never changed."
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp. Updated on every mutation. Used for conflict resolution."
+    },
+    "completed": {
+      "type": "boolean",
+      "description": "Whether the item is marked as done."
+    },
+    "completedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp. Set when completed becomes true."
+    },
+    "shortDescription": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The item's title or brief summary."
+    },
+    "listOrder": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Sort position in the list. Lower values appear first."
+    },
+    "priority": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "critical"],
+      "description": "Priority level."
+    },
+    "deadline": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp for the due date."
+    },
+    "reminders": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["0", "15m", "1h", "1d", "1w"]
+      },
+      "uniqueItems": true,
+      "description": "Deadline-relative reminder offset codes. '0' = at deadline, '15m' = 15 min before, '1h' = 1 hour before, '1d' = 1 day before, '1w' = 1 week before. Requires a deadline to be set."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Freeform text content."
+    },
+    "labels": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true,
+      "description": "Tags assigned to this item. Each label should exist in metadata.json."
+    },
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "A related URL (e.g. issue tracker link)."
+    }
+  },
+  "additionalProperties": false
+}
