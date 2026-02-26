@@ -1,0 +1,54 @@
+---
+import Base from '../../layouts/Base.astro';
+import { useTranslations, getLocaleStaticPaths } from '../../i18n/utils';
+
+export const getStaticPaths = getLocaleStaticPaths;
+
+const t = useTranslations(Astro.currentLocale);
+---
+
+<Base title={t('privacy.title')}>
+  <div class="max-w-3xl mx-auto px-6 py-16 prose prose-invert prose-gray">
+
+    <h1>{t('privacy.heading')}</h1>
+
+    <p><strong>{t('privacy.effectiveDate')}</strong></p>
+
+    <p>{t('privacy.introP')}</p>
+
+    <h2>{t('privacy.dataStorageHeading')}</h2>
+
+    <p>{t('privacy.dataStorageP')}</p>
+
+    <h2>{t('privacy.remoteSyncHeading')}</h2>
+
+    <p>{t('privacy.remoteSyncP')}</p>
+
+    <p>{t('privacy.remoteSyncTokens')}</p>
+
+    <h2>{t('privacy.dataCollectionHeading')}</h2>
+
+    <p>{t('privacy.dataCollectionP')}</p>
+
+    <h2>{t('privacy.thirdPartyHeading')}</h2>
+
+    <ul>
+      <li><strong>Apple App Store / Google Play Store:</strong> {t('privacy.thirdPartyAppStore')}</li>
+      <li><strong>RevenueCat:</strong> {t('privacy.thirdPartyRevenueCat')} <a href="https://www.revenuecat.com/privacy/">RevenueCat's privacy policy</a>.</li>
+      <li><strong>Expo Updates:</strong> {t('privacy.thirdPartyExpo')} <a href="https://expo.dev/privacy">Expo's privacy policy</a>.</li>
+    </ul>
+
+    <h2>{t('privacy.childrenHeading')}</h2>
+
+    <p>{t('privacy.childrenP')}</p>
+
+    <h2>{t('privacy.changesHeading')}</h2>
+
+    <p>{t('privacy.changesP')}</p>
+
+    <h2>{t('privacy.contactHeading')}</h2>
+
+    <p>{t('privacy.contactP')} <a href="mailto:privacy@gitsorted.app">privacy@gitsorted.app</a>.</p>
+
+  </div>
+</Base>

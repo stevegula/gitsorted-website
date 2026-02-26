@@ -1,0 +1,453 @@
+---
+import Base from '../../layouts/Base.astro';
+import { useTranslations, getLocaleStaticPaths } from '../../i18n/utils';
+
+export const getStaticPaths = getLocaleStaticPaths;
+
+const t = useTranslations(Astro.currentLocale);
+
+const repoStructure = `<repo>/
+├── .git/               # Standard git internals
+├── metadata.json       # Project metadata (type, labels)
+└── items/
+    ├── <uuid>.json     # One file per item
+    ├── <uuid>.json
+    └── ...`;
+
+const metadataExample = `{
+  "projectType": "todo" | "shopping" | "notes" | "generic",
+  "labels": ["bug", "feature", "urgent"],
+  "conflictStrategy": "last-write-wins" | "remote-wins" | "local-wins"
+}`;
+
+const taskExample = `{
+  "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "createdAt": "2026-01-15T10:00:00.000Z",
+  "updatedAt": "2026-01-15T14:30:00.000Z",
+  "completed": false,
+  "shortDescription": "Buy groceries",
+  "listOrder": 2,
+  "priority": "medium",
+  "deadline": "2026-01-16T17:00:00.000Z",
+  "reminders": ["1d", "1h", "0"],
+  "notes": "Check the pantry before going",
+  "labels": ["errands"],
+  "url": null
+}`;
+
+const noteExample = `{
+  "id": "11223344-5566-7788-99aa-bbccddeeff00",
+  "createdAt": "2026-03-01T12:00:00.000Z",
+  "updatedAt": "2026-03-01T15:45:00.000Z",
+  "listOrder": 0,
+  "title": "Meeting Notes",
+  "body": "# Sprint Planning\\n\\n- Discussed roadmap\\n- Assigned tasks",
+  "labels": ["work"]
+}`;
+
+const shoppingExample = `{
+  "id": "f9e8d7c6-b5a4-3210-fedc-ba0987654321",
+  "createdAt": "2026-02-01T08:00:00.000Z",
+  "updatedAt": "2026-02-01T08:00:00.000Z",
+  "completed": true,
+  "completedAt": "2026-02-01T09:15:00.000Z",
+  "shortDescription": "Milk (2%)",
+  "listOrder": 0,
+  "labels": ["dairy"]
+}`;
+
+const llmContract = `# GitSorted Repository Contract
+
+## Structure
+- Items are at: items/<uuid>.json
+- Metadata is at: metadata.json
+- Branch: main
+
+## Required fields for a new item
+- id: string (UUID v4, must match filename without .json)
+- createdAt: string (ISO 8601)
+- updatedAt: string (ISO 8601)
+- completed: boolean
+- shortDescription: string
+- listOrder: number
+
+## Optional fields
+- completedAt: string (ISO 8601, set when completed=true)
+- priority: "low" | "medium" | "high" | "critical"
+- notes: string
+- labels: string[] (must exist in metadata.json labels)
+- url: string
+- deadline: string (ISO 8601, todo projects only)
+- reminders: string[] (offset codes: "0", "15m", "1h", "1d", "1w", todo projects only)
+
+## Note items (notes projects only)
+- Required: id, createdAt, updatedAt, listOrder
+- Optional: title, body (markdown), labels
+- Note items do NOT have completed, shortDescription, priority, or deadline
+
+## Conflict resolution
+- Item files: determined by metadata.json conflictStrategy
+  - "last-write-wins" (default): compare updatedAt timestamps
+  - "remote-wins": always keep remote version
+  - "local-wins": always keep local version
+- metadata.json: labels are union-merged
+- Delete vs edit: edit always wins
+
+## Commit convention
+- Prefix: "GitSorted:"
+- The app ignores commit messages; only file content matters`;
+---
+
+<Base title={t('docs.title')} description={t('docs.description')}>
+  <div class="max-w-3xl mx-auto px-6 py-16">
+    <h1 class="text-3xl font-bold text-white mb-3">{t('docs.heading')}</h1>
+    <p class="text-gray-400 mb-12">
+      {t('docs.intro')}
+    </p>
+
+    <div class="space-y-16 text-gray-300">
+
+      <!-- Repository Structure -->
+      <section>
+        <h2 class="text-xl font-semibold text-white mb-4">{t('docs.repoStructureHeading')}</h2>
+        <p class="mb-4">{t('docs.repoStructureIntro')}</p>
+        <pre class="bg-gray-900 border border-gray-800 rounded-lg p-4 text-sm overflow-x-auto mb-4"><code class="text-gray-300">{repoStructure}</code></pre>
+        <ul class="space-y-2 text-gray-400 text-sm">
+          <li><strong class="text-gray-300">metadata.json</strong> — {t('docs.repoMetadataDesc')}</li>
+          <li><strong class="text-gray-300">items/</strong> — {t('docs.repoItemsDesc')}</li>
+          <li>{t('docs.repoNoNested', { items: 'items/' })}</li>
+          <li>{t('docs.repoMainBranch', { main: 'main' })}</li>
+        </ul>
+      </section>
+
+      <!-- metadata.json -->
+      <section>
+        <h2 class="text-xl font-semibold text-white mb-4">{t('docs.metadataHeading')}</h2>
+        <p class="mb-4">{t('docs.metadataIntro')}</p>
+        <pre class="bg-gray-900 border border-gray-800 rounded-lg p-4 text-sm overflow-x-auto mb-4"><code class="text-gray-300">{metadataExample}</code></pre>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm border border-gray-800 rounded-lg">
+            <thead>
+              <tr class="bg-gray-900 text-left text-gray-400">
+                <th class="px-4 py-2 border-b border-gray-800">{t('docs.fieldCol')}</th>
+                <th class="px-4 py-2 border-b border-gray-800">{t('docs.typeCol')}</th>
+                <th class="px-4 py-2 border-b border-gray-800">{t('docs.requiredCol')}</th>
+                <th class="px-4 py-2 border-b border-gray-800">{t('docs.descriptionCol')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-b border-gray-800/50">
+                <td class="px-4 py-2 font-mono text-gray-300">projectType</td>
+                <td class="px-4 py-2 text-gray-400">string</td>
+                <td class="px-4 py-2 text-gray-400">yes</td>
+                <td class="px-4 py-2 text-gray-400">{t('docs.metadataProjectTypeDesc', { todo: 'todo', shopping: 'shopping', notes: 'notes', generic: 'generic' })}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">labels</td>
+                <td class="px-4 py-2 text-gray-400">string[]</td>
+                <td class="px-4 py-2 text-gray-400">no</td>
+                <td class="px-4 py-2 text-gray-400">{t('docs.metadataLabelsDesc')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">conflictStrategy</td>
+                <td class="px-4 py-2 text-gray-400">string</td>
+                <td class="px-4 py-2 text-gray-400">no</td>
+                <td class="px-4 py-2 text-gray-400">{t('docs.metadataConflictDesc', { lww: 'last-write-wins', rw: 'remote-wins', lw: 'local-wins' })}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Item File Format -->
+      <section>
+        <h2 class="text-xl font-semibold text-white mb-4">{t('docs.itemFormatHeading')}</h2>
+        <p class="mb-4">{t('docs.itemFormatIntro', { path: 'items/<uuid>.json' })}</p>
+
+        <h3 class="text-lg font-medium text-white mt-8 mb-3">{t('docs.commonFieldsHeading')}</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm border border-gray-800 rounded-lg">
+            <thead>
+              <tr class="bg-gray-900 text-left text-gray-400">
+                <th class="px-4 py-2 border-b border-gray-800">{t('docs.fieldCol')}</th>
+                <th class="px-4 py-2 border-b border-gray-800">{t('docs.typeCol')}</th>
+                <th class="px-4 py-2 border-b border-gray-800">{t('docs.requiredCol')}</th>
+                <th class="px-4 py-2 border-b border-gray-800">{t('docs.descriptionCol')}</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-800/50">
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">id</td>
+                <td class="px-4 py-2 text-gray-400">string</td>
+                <td class="px-4 py-2 text-gray-400">yes</td>
+                <td class="px-4 py-2 text-gray-400">{t('docs.fieldIdDesc')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">createdAt</td>
+                <td class="px-4 py-2 text-gray-400">string</td>
+                <td class="px-4 py-2 text-gray-400">yes</td>
+                <td class="px-4 py-2 text-gray-400">{t('docs.fieldCreatedAtDesc')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">updatedAt</td>
+                <td class="px-4 py-2 text-gray-400">string</td>
+                <td class="px-4 py-2 text-gray-400">yes</td>
+                <td class="px-4 py-2 text-gray-400">{t('docs.fieldUpdatedAtDesc')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">completed</td>
+                <td class="px-4 py-2 text-gray-400">boolean</td>
+                <td class="px-4 py-2 text-gray-400">yes</td>
+                <td class="px-4 py-2 text-gray-400">{t('docs.fieldCompletedDesc')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">shortDescription</td>
+                <td class="px-4 py-2 text-gray-400">string</td>
+                <td class="px-4 py-2 text-gray-400">yes</td>
+                <td class="px-4 py-2 text-gray-400">{t('docs.fieldShortDescDesc')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">completedAt</td>
+                <td class="px-4 py-2 text-gray-400">string</td>
+                <td class="px-4 py-2 text-gray-400">no</td>
+                <td class="px-4 py-2 text-gray-400">{t('docs.fieldCompletedAtDesc')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">listOrder</td>
+                <td class="px-4 py-2 text-gray-400">number</td>
+                <td class="px-4 py-2 text-gray-400">yes</td>
+                <td class="px-4 py-2 text-gray-400">{t('docs.fieldListOrderDesc')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">priority</td>
+                <td class="px-4 py-2 text-gray-400">string</td>
+                <td class="px-4 py-2 text-gray-400">no</td>
+                <td class="px-4 py-2 text-gray-400">{t('docs.fieldPriorityDesc')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">notes</td>
+                <td class="px-4 py-2 text-gray-400">string</td>
+                <td class="px-4 py-2 text-gray-400">no</td>
+                <td class="px-4 py-2 text-gray-400">{t('docs.fieldNotesDesc')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">labels</td>
+                <td class="px-4 py-2 text-gray-400">string[]</td>
+                <td class="px-4 py-2 text-gray-400">no</td>
+                <td class="px-4 py-2 text-gray-400">{t('docs.fieldLabelsDesc')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">url</td>
+                <td class="px-4 py-2 text-gray-400">string</td>
+                <td class="px-4 py-2 text-gray-400">no</td>
+                <td class="px-4 py-2 text-gray-400">{t('docs.fieldUrlDesc')}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="text-lg font-medium text-white mt-8 mb-3">{t('docs.taskOnlyHeading')}</h3>
+        <p class="text-gray-400 text-sm mb-3">{t('docs.taskOnlyIntro', { todo: 'todo' })}</p>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm border border-gray-800 rounded-lg">
+            <thead>
+              <tr class="bg-gray-900 text-left text-gray-400">
+                <th class="px-4 py-2 border-b border-gray-800">{t('docs.fieldCol')}</th>
+                <th class="px-4 py-2 border-b border-gray-800">{t('docs.typeCol')}</th>
+                <th class="px-4 py-2 border-b border-gray-800">{t('docs.requiredCol')}</th>
+                <th class="px-4 py-2 border-b border-gray-800">{t('docs.descriptionCol')}</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-800/50">
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">deadline</td>
+                <td class="px-4 py-2 text-gray-400">string</td>
+                <td class="px-4 py-2 text-gray-400">no</td>
+                <td class="px-4 py-2 text-gray-400">{t('docs.fieldDeadlineDesc')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">reminders</td>
+                <td class="px-4 py-2 text-gray-400">string[]</td>
+                <td class="px-4 py-2 text-gray-400">no</td>
+                <td class="px-4 py-2 text-gray-400">{t('docs.fieldRemindersDesc')}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="text-lg font-medium text-white mt-8 mb-3">{t('docs.exampleTaskHeading')}</h3>
+        <pre class="bg-gray-900 border border-gray-800 rounded-lg p-4 text-sm overflow-x-auto"><code class="text-gray-300">{taskExample}</code></pre>
+
+        <h3 class="text-lg font-medium text-white mt-8 mb-3">{t('docs.exampleShoppingHeading')}</h3>
+        <pre class="bg-gray-900 border border-gray-800 rounded-lg p-4 text-sm overflow-x-auto"><code class="text-gray-300">{shoppingExample}</code></pre>
+
+        <h3 class="text-lg font-medium text-white mt-8 mb-3">{t('docs.noteItemsHeading')}</h3>
+        <p class="text-gray-400 text-sm mb-3" set:html={t('docs.noteItemsIntro', { notes: '<code class="text-gray-300">notes</code>', not: '<strong class="text-white">not</strong>', completed: '<code class="text-gray-300">completed</code>', shortDescription: '<code class="text-gray-300">shortDescription</code>', priority: '<code class="text-gray-300">priority</code>', deadline: '<code class="text-gray-300">deadline</code>' })} />
+        <div class="overflow-x-auto mb-4">
+          <table class="w-full text-sm border border-gray-800 rounded-lg">
+            <thead>
+              <tr class="bg-gray-900 text-left text-gray-400">
+                <th class="px-4 py-2 border-b border-gray-800">{t('docs.fieldCol')}</th>
+                <th class="px-4 py-2 border-b border-gray-800">{t('docs.typeCol')}</th>
+                <th class="px-4 py-2 border-b border-gray-800">{t('docs.requiredCol')}</th>
+                <th class="px-4 py-2 border-b border-gray-800">{t('docs.descriptionCol')}</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-800/50">
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">id</td>
+                <td class="px-4 py-2 text-gray-400">string</td>
+                <td class="px-4 py-2 text-gray-400">yes</td>
+                <td class="px-4 py-2 text-gray-400">{t('docs.fieldIdDesc')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">createdAt</td>
+                <td class="px-4 py-2 text-gray-400">string</td>
+                <td class="px-4 py-2 text-gray-400">yes</td>
+                <td class="px-4 py-2 text-gray-400">{t('docs.fieldCreatedAtDesc')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">updatedAt</td>
+                <td class="px-4 py-2 text-gray-400">string</td>
+                <td class="px-4 py-2 text-gray-400">yes</td>
+                <td class="px-4 py-2 text-gray-400">{t('docs.fieldUpdatedAtDesc')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">listOrder</td>
+                <td class="px-4 py-2 text-gray-400">number</td>
+                <td class="px-4 py-2 text-gray-400">yes</td>
+                <td class="px-4 py-2 text-gray-400">{t('docs.fieldListOrderDesc')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">title</td>
+                <td class="px-4 py-2 text-gray-400">string</td>
+                <td class="px-4 py-2 text-gray-400">no</td>
+                <td class="px-4 py-2 text-gray-400">{t('docs.noteTitleDesc')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">body</td>
+                <td class="px-4 py-2 text-gray-400">string</td>
+                <td class="px-4 py-2 text-gray-400">no</td>
+                <td class="px-4 py-2 text-gray-400">{t('docs.noteBodyDesc')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">labels</td>
+                <td class="px-4 py-2 text-gray-400">string[]</td>
+                <td class="px-4 py-2 text-gray-400">no</td>
+                <td class="px-4 py-2 text-gray-400">{t('docs.noteLabelsDesc')}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="text-lg font-medium text-white mt-8 mb-3">{t('docs.exampleNoteHeading')}</h3>
+        <pre class="bg-gray-900 border border-gray-800 rounded-lg p-4 text-sm overflow-x-auto"><code class="text-gray-300">{noteExample}</code></pre>
+
+        <h3 class="text-lg font-medium text-white mt-8 mb-3">{t('docs.jsonSchemasHeading')}</h3>
+        <p class="text-gray-400 text-sm mb-3">{t('docs.jsonSchemasIntro')}</p>
+        <ul class="space-y-2 text-gray-400 text-sm">
+          <li><a href="/schemas/task-item.schema.json" class="text-blue-400 hover:text-blue-300">task-item.schema.json</a> — {t('docs.schemaTaskItem')}</li>
+          <li><a href="/schemas/shopping-item.schema.json" class="text-blue-400 hover:text-blue-300">shopping-item.schema.json</a> — {t('docs.schemaShoppingItem')}</li>
+          <li><a href="/schemas/note-item.schema.json" class="text-blue-400 hover:text-blue-300">note-item.schema.json</a> — {t('docs.schemaNoteItem')}</li>
+          <li><a href="/schemas/metadata.schema.json" class="text-blue-400 hover:text-blue-300">metadata.schema.json</a> — {t('docs.schemaMetadata')}</li>
+        </ul>
+      </section>
+
+      <!-- Git Commit Conventions -->
+      <section>
+        <h2 class="text-xl font-semibold text-white mb-4">{t('docs.commitHeading')}</h2>
+        <p class="mb-4" set:html={t('docs.commitIntro', { prefix: '<code class="text-gray-300">GitSorted:</code>' })} />
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm border border-gray-800 rounded-lg">
+            <thead>
+              <tr class="bg-gray-900 text-left text-gray-400">
+                <th class="px-4 py-2 border-b border-gray-800">{t('docs.commitMsgCol')}</th>
+                <th class="px-4 py-2 border-b border-gray-800">{t('docs.commitWhenCol')}</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-800/50">
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">GitSorted: update N file(s)</td>
+                <td class="px-4 py-2 text-gray-400">{t('docs.commitUpdateWhen')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">GitSorted: merge resolved</td>
+                <td class="px-4 py-2 text-gray-400">{t('docs.commitMergeWhen')}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="text-gray-400 text-sm mt-3">
+          {t('docs.commitNote')}
+        </p>
+      </section>
+
+      <!-- Sync and Conflict Resolution -->
+      <section>
+        <h2 class="text-xl font-semibold text-white mb-4">{t('docs.syncHeading')}</h2>
+        <p class="mb-4">{t('docs.syncIntro')}</p>
+
+        <h3 class="text-lg font-medium text-white mt-6 mb-3">{t('docs.syncCycleHeading')}</h3>
+        <ol class="list-decimal list-inside space-y-2 text-gray-400 text-sm mb-6">
+          <li><strong class="text-gray-300">Push</strong> — {t('docs.syncPush')}</li>
+          <li><strong class="text-gray-300">Pull</strong> — {t('docs.syncPull')}</li>
+          <li>{t('docs.syncCleanMerge')}</li>
+          <li>{t('docs.syncConflict')}</li>
+        </ol>
+
+        <h3 class="text-lg font-medium text-white mt-6 mb-3">{t('docs.conflictHeading')}</h3>
+        <p class="text-gray-400 text-sm mb-4">{t('docs.conflictIntro')}</p>
+
+        <div class="space-y-6">
+          <div class="bg-gray-900 border border-gray-800 rounded-lg p-5">
+            <h4 class="font-medium text-white mb-2">{t('docs.conflictBothTitle')}</h4>
+            <p class="text-gray-400 text-sm mb-3">{t('docs.conflictBothDesc')}</p>
+            <ul class="space-y-2 text-gray-400 text-sm">
+              <li><strong class="text-gray-300">Item files (items/*.json)</strong> — <span set:html={t('docs.conflictItemFiles', { conflictStrategy: '<code class="text-gray-300">conflictStrategy</code>', metadata: '<code class="text-gray-300">metadata.json</code>' })} />
+                <ul class="mt-1 ml-4 space-y-1">
+                  <li><code class="text-gray-300">last-write-wins</code> (default) — {t('docs.conflictLww', { updatedAt: 'updatedAt' })}</li>
+                  <li><code class="text-gray-300">remote-wins</code> — {t('docs.conflictRw')}</li>
+                  <li><code class="text-gray-300">local-wins</code> — {t('docs.conflictLw')}</li>
+                </ul>
+              </li>
+              <li><strong class="text-gray-300">Metadata (metadata.json)</strong> — <span set:html={t('docs.conflictMetadata', { unionMerge: '<strong class="text-white">Union merge.</strong>', projectType: '<code class="text-gray-300">projectType</code>' })} /></li>
+            </ul>
+          </div>
+
+          <div class="bg-gray-900 border border-gray-800 rounded-lg p-5">
+            <h4 class="font-medium text-white mb-2">{t('docs.conflictDeleteTitle')}</h4>
+            <p class="text-gray-400 text-sm mb-3">{t('docs.conflictDeleteDesc')}</p>
+            <ul class="space-y-2 text-gray-400 text-sm">
+              <li><strong class="text-gray-300">Local delete, remote edit</strong> — <span set:html={t('docs.conflictLocalDelRemoteEdit', { editWins: '<strong class="text-white">Edit wins.</strong>' })} /></li>
+              <li><strong class="text-gray-300">Remote delete, local edit</strong> — <span set:html={t('docs.conflictRemoteDelLocalEdit', { editWins: '<strong class="text-white">Edit wins.</strong>' })} /></li>
+            </ul>
+            <p class="text-gray-400 text-sm mt-2">{t('docs.conflictPreservation')}</p>
+          </div>
+        </div>
+
+        <p class="text-gray-400 text-sm mt-4">{t('docs.conflictMergeCommit')}</p>
+      </section>
+
+      <!-- Working with GitSorted repos externally -->
+      <section>
+        <h2 class="text-xl font-semibold text-white mb-4">{t('docs.externalHeading')}</h2>
+        <p class="mb-4 text-gray-400">{t('docs.externalIntro')}</p>
+        <ul class="space-y-3 text-gray-400 text-sm">
+          <li><strong class="text-gray-300">{t('docs.externalAddTitle')}</strong> — {t('docs.externalAddDesc')}</li>
+          <li><strong class="text-gray-300">{t('docs.externalEditTitle')}</strong> — {t('docs.externalEditDesc')}</li>
+          <li><strong class="text-gray-300">{t('docs.externalDeleteTitle')}</strong> — {t('docs.externalDeleteDesc')}</li>
+          <li><strong class="text-gray-300">{t('docs.externalLabelsTitle')}</strong> — {t('docs.externalLabelsDesc')}</li>
+          <li><strong class="text-gray-300">{t('docs.externalBranchTitle')}</strong> — {t('docs.externalBranchDesc')}</li>
+        </ul>
+      </section>
+
+      <!-- LLM Integration Notes -->
+      <section>
+        <h2 class="text-xl font-semibold text-white mb-4">{t('docs.llmHeading')}</h2>
+        <p class="mb-4 text-gray-400">{t('docs.llmIntro')}</p>
+        <pre class="bg-gray-900 border border-gray-800 rounded-lg p-4 text-sm overflow-x-auto"><code class="text-gray-300">{llmContract}</code></pre>
+      </section>
+
+    </div>
+  </div>
+</Base>

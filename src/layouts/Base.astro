@@ -1,17 +1,21 @@
 ---
 import '../styles/global.css';
+import { useTranslations, localePath, localeNames, locales } from '../i18n/utils';
 
 interface Props {
   title: string;
   description?: string;
 }
 
-const { title, description = 'Task lists, shopping lists, and notes backed by git. Your data, your device, your repos.' } = Astro.props;
+const t = useTranslations(Astro.currentLocale);
+const locale = Astro.currentLocale ?? 'en';
+const { title, description = t('meta.defaultDescription') } = Astro.props;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const currentPath = Astro.url.pathname.replace(new RegExp(`^/${locale === 'en' ? '' : locale}`), '') || '/';
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={locale}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -22,18 +26,43 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <link rel="sitemap" href="/sitemap-index.xml" />
     <link rel="help" type="text/plain" href="/llms.txt" />
     <meta name="apple-itunes-app" content="app-id=XXXXXXXXXX" />
+    {locales.map(l => (
+      <link rel="alternate" hreflang={l} href={new URL(localePath(currentPath, l), Astro.site).href} />
+    ))}
+    <link rel="alternate" hreflang="x-default" href={new URL(currentPath, Astro.site).href} />
     <title>{title}</title>
   </head>
   <body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col">
     <nav class="border-b border-gray-800 px-6 py-4">
       <div class="max-w-4xl mx-auto flex items-center justify-between">
-        <a href="/" class="text-lg font-semibold text-white">GitSorted</a>
-        <div class="flex gap-6 text-sm text-gray-400">
-          <a href="/docs" class="hover:text-white transition-colors">Docs</a>
-          <a href="/byol" class="hover:text-white transition-colors">BYOL</a>
-          <a href="/privacy" class="hover:text-white transition-colors">Privacy</a>
-          <a href="/terms" class="hover:text-white transition-colors">Terms</a>
-          <a href="/support" class="hover:text-white transition-colors">Support</a>
+        <a href={localePath('/', locale)} class="text-lg font-semibold text-white">GitSorted</a>
+        <div class="flex items-center gap-6 text-sm text-gray-400">
+          <a href={localePath('/docs', locale)} class="hover:text-white transition-colors">{t('nav.docs')}</a>
+          <a href={localePath('/byol', locale)} class="hover:text-white transition-colors">{t('nav.byol')}</a>
+          <a href={localePath('/privacy', locale)} class="hover:text-white transition-colors">{t('nav.privacy')}</a>
+          <a href={localePath('/terms', locale)} class="hover:text-white transition-colors">{t('nav.terms')}</a>
+          <a href={localePath('/support', locale)} class="hover:text-white transition-colors">{t('nav.support')}</a>
+          <details class="relative">
+            <summary class="cursor-pointer hover:text-white transition-colors list-none flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5a17.92 17.92 0 01-8.716-2.247m0 0A8.966 8.966 0 013 12c0-1.264.26-2.466.733-3.559" />
+              </svg>
+              {localeNames[locale as keyof typeof localeNames] ?? 'English'}
+            </summary>
+            <div class="absolute top-8 right-0 bg-gray-900 border border-gray-800 rounded-lg shadow-xl p-3 grid grid-cols-3 gap-1 w-80 max-h-72 overflow-y-auto z-50">
+              {locales.map(l => (
+                <a
+                  href={localePath(currentPath, l)}
+                  class:list={[
+                    'text-xs px-2 py-1.5 rounded transition-colors',
+                    l === locale ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800',
+                  ]}
+                >
+                  {localeNames[l as keyof typeof localeNames]}
+                </a>
+              ))}
+            </div>
+          </details>
         </div>
       </div>
     </nav>
@@ -42,8 +71,58 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
       <slot />
     </main>
 
-    <footer class="border-t border-gray-800 px-6 py-6 text-center text-sm text-gray-500">
-      &copy; {new Date().getFullYear()} Steve Gula. All rights reserved.
+    <footer class="border-t border-gray-800 px-6 py-6">
+      <div class="max-w-4xl mx-auto flex flex-col items-center gap-4">
+        <details class="relative">
+          <summary class="text-sm text-gray-500 cursor-pointer hover:text-gray-300 transition-colors list-none flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5a17.92 17.92 0 01-8.716-2.247m0 0A8.966 8.966 0 013 12c0-1.264.26-2.466.733-3.559" />
+            </svg>
+            {localeNames[locale as keyof typeof localeNames] ?? 'English'}
+          </summary>
+          <div class="absolute bottom-8 left-1/2 -translate-x-1/2 bg-gray-900 border border-gray-800 rounded-lg shadow-xl p-3 grid grid-cols-3 gap-1 w-80 max-h-72 overflow-y-auto z-50">
+            {locales.map(l => (
+              <a
+                href={localePath(currentPath, l)}
+                class:list={[
+                  'text-xs px-2 py-1.5 rounded transition-colors',
+                  l === locale ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800',
+                ]}
+              >
+                {localeNames[l as keyof typeof localeNames]}
+              </a>
+            ))}
+          </div>
+        </details>
+        <p class="text-sm text-gray-500">
+          &copy; {new Date().getFullYear()} Steve Gula. {t('footer.rights')}
+        </p>
+      </div>
     </footer>
+    <script is:inline define:vars={{ locales, currentPath }}>
+      (function () {
+        // Only redirect on first visit; respect manual language choice
+        if (localStorage.getItem('gs-locale')) return;
+        // Only auto-detect on the default (English) pages
+        if (document.documentElement.lang !== 'en') {
+          localStorage.setItem('gs-locale', document.documentElement.lang);
+          return;
+        }
+        var langs = navigator.languages || [navigator.language];
+        for (var i = 0; i < langs.length; i++) {
+          var tag = langs[i].toLowerCase();
+          // Try exact match first (e.g. "pt"), then base language (e.g. "pt" from "pt-BR")
+          var match = locales.find(function (l) { return l === tag; })
+            || locales.find(function (l) { return tag.startsWith(l + '-') || l.startsWith(tag + '-'); });
+          if (match && match !== 'en') {
+            localStorage.setItem('gs-locale', match);
+            var dest = '/' + match + (currentPath === '/' ? '' : currentPath);
+            window.location.replace(dest);
+            return;
+          }
+        }
+        localStorage.setItem('gs-locale', 'en');
+      })();
+    </script>
   </body>
 </html>

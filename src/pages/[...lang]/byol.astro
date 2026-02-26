@@ -1,0 +1,278 @@
+---
+import Base from '../../layouts/Base.astro';
+import { useTranslations, getLocaleStaticPaths } from '../../i18n/utils';
+
+export const getStaticPaths = getLocaleStaticPaths;
+
+const t = useTranslations(Astro.currentLocale);
+
+const gh = 'https://github.com/stevegula';
+
+const templates = [
+  { repo: 'gs-book-list', name: t('byol.templateBookListName'), desc: t('byol.templateBookListDesc') },
+  { repo: 'gs-daily-exercise', name: t('byol.templateDailyExerciseName'), desc: t('byol.templateDailyExerciseDesc') },
+  { repo: 'gs-expense-tracker', name: t('byol.templateExpenseTrackerName'), desc: t('byol.templateExpenseTrackerDesc') },
+  { repo: 'gs-food-log', name: t('byol.templateFoodLogName'), desc: t('byol.templateFoodLogDesc') },
+  { repo: 'gs-habit-tracker', name: t('byol.templateHabitTrackerName'), desc: t('byol.templateHabitTrackerDesc') },
+  { repo: 'gs-home-maintenance', name: t('byol.templateHomeMaintenanceName'), desc: t('byol.templateHomeMaintenanceDesc') },
+  { repo: 'gs-invoice-tracker', name: t('byol.templateInvoiceTrackerName'), desc: t('byol.templateInvoiceTrackerDesc') },
+  { repo: 'gs-job-applications', name: t('byol.templateJobApplicationsName'), desc: t('byol.templateJobApplicationsDesc') },
+  { repo: 'gs-medication-tracker', name: t('byol.templateMedicationTrackerName'), desc: t('byol.templateMedicationTrackerDesc') },
+  { repo: 'gs-meeting-log', name: t('byol.templateMeetingLogName'), desc: t('byol.templateMeetingLogDesc') },
+  { repo: 'gs-movie-watchlist', name: t('byol.templateMovieWatchlistName'), desc: t('byol.templateMovieWatchlistDesc') },
+  { repo: 'gs-plant-care', name: t('byol.templatePlantCareName'), desc: t('byol.templatePlantCareDesc') },
+  { repo: 'gs-recipe-collection', name: t('byol.templateRecipeCollectionName'), desc: t('byol.templateRecipeCollectionDesc') },
+  { repo: 'gs-sleep-log', name: t('byol.templateSleepLogName'), desc: t('byol.templateSleepLogDesc') },
+  { repo: 'gs-water-intake', name: t('byol.templateWaterIntakeName'), desc: t('byol.templateWaterIntakeDesc') },
+  { repo: 'gs-wine-journal', name: t('byol.templateWineJournalName'), desc: t('byol.templateWineJournalDesc') },
+  { repo: 'gs-work-mileage', name: t('byol.templateWorkMileageName'), desc: t('byol.templateWorkMileageDesc') },
+];
+
+const schemaExample = `{
+  "projectType": "custom",
+  "schema": {
+    "primaryField": "description",
+    "fields": [
+      {
+        "key": "description",
+        "label": "Description",
+        "type": "string",
+        "required": true
+      },
+      {
+        "key": "amount",
+        "label": "Amount ($)",
+        "type": "number",
+        "required": true,
+        "listDisplay": true
+      },
+      {
+        "key": "category",
+        "label": "Category",
+        "type": "enum",
+        "options": ["Travel", "Meals", "Supplies", "Software", "Other"],
+        "required": true,
+        "listDisplay": true,
+        "sortable": true
+      },
+      {
+        "key": "date",
+        "label": "Date",
+        "type": "date",
+        "required": true,
+        "sortable": true
+      },
+      {
+        "key": "reimbursed",
+        "label": "Reimbursed",
+        "type": "checked"
+      },
+      {
+        "key": "notes",
+        "label": "Notes",
+        "type": "text"
+      }
+    ]
+  }
+}`;
+---
+
+<Base title={t('byol.title')} description={t('byol.description')}>
+  <div class="max-w-3xl mx-auto px-6 py-16">
+    <h1 class="text-3xl font-bold text-white mb-3">{t('byol.heading')}</h1>
+    <p class="text-gray-400 mb-12">
+      {t('byol.intro')}
+      <span class="inline-block mt-3 text-sm text-yellow-400/80">{t('byol.betaNotice')}</span>
+    </p>
+
+    <div class="space-y-16 text-gray-300">
+
+      <!-- How it works -->
+      <section>
+        <h2 class="text-xl font-semibold text-white mb-4">{t('byol.howItWorksHeading')}</h2>
+        <ol class="list-decimal list-inside space-y-3 text-gray-400">
+          <li><strong class="text-gray-300">{t('byol.howStep1Title')}</strong> {t('byol.howStep1', { metadata: 'metadata.json', projectType: 'projectType', custom: '"custom"', schema: 'schema' })}</li>
+          <li><strong class="text-gray-300">{t('byol.howStep2Title')}</strong> {t('byol.howStep2')}</li>
+          <li><strong class="text-gray-300">{t('byol.howStep3Title')}</strong> {t('byol.howStep3')}</li>
+          <li><strong class="text-gray-300">{t('byol.howStep4Title')}</strong> {t('byol.howStep4', { items: 'items/', data: 'data' })}</li>
+        </ol>
+      </section>
+
+      <!-- Field types -->
+      <section>
+        <h2 class="text-xl font-semibold text-white mb-4">{t('byol.fieldTypesHeading')}</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm border border-gray-800 rounded-lg">
+            <thead>
+              <tr class="bg-gray-900 text-left text-gray-400">
+                <th class="px-4 py-2 border-b border-gray-800">{t('byol.fieldTypeCol')}</th>
+                <th class="px-4 py-2 border-b border-gray-800">{t('byol.fieldInputCol')}</th>
+                <th class="px-4 py-2 border-b border-gray-800">{t('byol.fieldDescCol')}</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-800/50">
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">string</td>
+                <td class="px-4 py-2 text-gray-400">{t('byol.fieldStringInput')}</td>
+                <td class="px-4 py-2 text-gray-400">{t('byol.fieldStringDesc')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">text</td>
+                <td class="px-4 py-2 text-gray-400">{t('byol.fieldTextInput')}</td>
+                <td class="px-4 py-2 text-gray-400">{t('byol.fieldTextDesc')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">number</td>
+                <td class="px-4 py-2 text-gray-400">{t('byol.fieldNumberInput')}</td>
+                <td class="px-4 py-2 text-gray-400">{t('byol.fieldNumberDesc')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">boolean</td>
+                <td class="px-4 py-2 text-gray-400">{t('byol.fieldBooleanInput')}</td>
+                <td class="px-4 py-2 text-gray-400">{t('byol.fieldBooleanDesc')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">date</td>
+                <td class="px-4 py-2 text-gray-400">{t('byol.fieldDateInput')}</td>
+                <td class="px-4 py-2 text-gray-400">{t('byol.fieldDateDesc')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">datetime</td>
+                <td class="px-4 py-2 text-gray-400">{t('byol.fieldDatetimeInput')}</td>
+                <td class="px-4 py-2 text-gray-400">{t('byol.fieldDatetimeDesc')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">enum</td>
+                <td class="px-4 py-2 text-gray-400">{t('byol.fieldEnumInput')}</td>
+                <td class="px-4 py-2 text-gray-400">{t('byol.fieldEnumDesc')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">url</td>
+                <td class="px-4 py-2 text-gray-400">{t('byol.fieldUrlInput')}</td>
+                <td class="px-4 py-2 text-gray-400">{t('byol.fieldUrlDesc')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">checked</td>
+                <td class="px-4 py-2 text-gray-400">{t('byol.fieldCheckedInput')}</td>
+                <td class="px-4 py-2 text-gray-400">{t('byol.fieldCheckedDesc')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">priority</td>
+                <td class="px-4 py-2 text-gray-400">{t('byol.fieldPriorityInput')}</td>
+                <td class="px-4 py-2 text-gray-400">{t('byol.fieldPriorityDesc')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">recurrence</td>
+                <td class="px-4 py-2 text-gray-400">{t('byol.fieldRecurrenceInput')}</td>
+                <td class="px-4 py-2 text-gray-400">{t('byol.fieldRecurrenceDesc')}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Field options -->
+      <section>
+        <h2 class="text-xl font-semibold text-white mb-4">{t('byol.fieldOptionsHeading')}</h2>
+        <p class="text-gray-400 mb-4">{t('byol.fieldOptionsIntro')}</p>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm border border-gray-800 rounded-lg">
+            <thead>
+              <tr class="bg-gray-900 text-left text-gray-400">
+                <th class="px-4 py-2 border-b border-gray-800">{t('byol.fieldOptionPropertyCol')}</th>
+                <th class="px-4 py-2 border-b border-gray-800">{t('byol.fieldOptionTypeCol')}</th>
+                <th class="px-4 py-2 border-b border-gray-800">{t('byol.fieldOptionDescCol')}</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-800/50">
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">key</td>
+                <td class="px-4 py-2 text-gray-400">string</td>
+                <td class="px-4 py-2 text-gray-400">{t('byol.fieldOptionKeyDesc')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">label</td>
+                <td class="px-4 py-2 text-gray-400">string</td>
+                <td class="px-4 py-2 text-gray-400">{t('byol.fieldOptionLabelDesc')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">type</td>
+                <td class="px-4 py-2 text-gray-400">string</td>
+                <td class="px-4 py-2 text-gray-400">{t('byol.fieldOptionTypeDesc')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">required</td>
+                <td class="px-4 py-2 text-gray-400">boolean</td>
+                <td class="px-4 py-2 text-gray-400">{t('byol.fieldOptionRequiredDesc')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">options</td>
+                <td class="px-4 py-2 text-gray-400">string[]</td>
+                <td class="px-4 py-2 text-gray-400">{t('byol.fieldOptionOptionsDesc')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">listDisplay</td>
+                <td class="px-4 py-2 text-gray-400">boolean</td>
+                <td class="px-4 py-2 text-gray-400">{t('byol.fieldOptionListDisplayDesc')}</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-300">sortable</td>
+                <td class="px-4 py-2 text-gray-400">boolean</td>
+                <td class="px-4 py-2 text-gray-400">{t('byol.fieldOptionSortableDesc')}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="text-gray-400 text-sm mt-4">
+          {t('byol.primaryFieldNote', { primaryField: 'primaryField', key: 'key' })}
+        </p>
+      </section>
+
+      <!-- Example schema -->
+      <section>
+        <h2 class="text-xl font-semibold text-white mb-4">{t('byol.exampleHeading')}</h2>
+        <p class="text-gray-400 mb-4">{t('byol.exampleIntro', { metadata: 'metadata.json' })}</p>
+        <pre class="bg-gray-900 border border-gray-800 rounded-lg p-4 text-sm overflow-x-auto"><code class="text-gray-300">{schemaExample}</code></pre>
+      </section>
+
+      <!-- Templates -->
+      <section>
+        <h2 class="text-xl font-semibold text-white mb-4">{t('byol.templatesHeading')}</h2>
+        <p class="text-gray-400 mb-6">
+          {t('byol.templatesIntro', { metadata: 'metadata.json' })}
+        </p>
+        <div class="grid sm:grid-cols-2 gap-4">
+          {templates.map(tmpl => (
+            <a
+              href={`${gh}/${tmpl.repo}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="block bg-gray-900 border border-gray-800 rounded-lg p-4 hover:border-gray-600 transition-colors"
+            >
+              <h3 class="text-sm font-semibold text-white mb-1">{tmpl.name}</h3>
+              <p class="text-xs text-gray-400">{tmpl.desc}</p>
+              <p class="text-xs text-gray-500 mt-2 font-mono">{tmpl.repo}</p>
+            </a>
+          ))}
+        </div>
+      </section>
+
+      <!-- Creating your own -->
+      <section>
+        <h2 class="text-xl font-semibold text-white mb-4">{t('byol.createHeading')}</h2>
+        <p class="text-gray-400 mb-4">{t('byol.createIntro')}</p>
+        <ol class="list-decimal list-inside space-y-3 text-gray-400">
+          <li>{t('byol.createStep1')} <code class="text-gray-300">git init my-list && cd my-list</code></li>
+          <li>{t('byol.createStep2', { metadata: 'metadata.json', projectType: 'projectType: "custom"' })}</li>
+          <li>{t('byol.createStep3', { items: 'items/' })} <code class="text-gray-300">mkdir items && touch items/.gitkeep</code></li>
+          <li>{t('byol.createStep4')} <code class="text-gray-300">git add -A && git commit -m "init" && git push -u origin main</code></li>
+          <li>{t('byol.createStep5')}</li>
+        </ol>
+        <p class="text-gray-400 text-sm mt-4">
+          {t('byol.createNote', { metadata: 'metadata.json' })}
+        </p>
+      </section>
+
+    </div>
+  </div>
+</Base>

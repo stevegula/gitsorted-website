@@ -1,0 +1,56 @@
+---
+import Base from '../../layouts/Base.astro';
+import { useTranslations, getLocaleStaticPaths } from '../../i18n/utils';
+
+export const getStaticPaths = getLocaleStaticPaths;
+
+const t = useTranslations(Astro.currentLocale);
+---
+
+<Base title={t('terms.title')}>
+  <div class="max-w-3xl mx-auto px-6 py-16 prose prose-invert prose-gray">
+
+    <h1>{t('terms.heading')}</h1>
+
+    <p><strong>{t('terms.effectiveDate')}</strong></p>
+
+    <p>{t('terms.introP')}</p>
+
+    <h2>{t('terms.acceptanceHeading')}</h2>
+
+    <p>{t('terms.acceptanceP')}</p>
+
+    <h2>{t('terms.descriptionHeading')}</h2>
+
+    <p>{t('terms.descriptionP')}</p>
+
+    <h2>{t('terms.yourDataHeading')}</h2>
+
+    <p>{t('terms.yourDataP')}</p>
+
+    <h2>{t('terms.iapHeading')}</h2>
+
+    <p>{t('terms.iapP')}</p>
+
+    <h2>{t('terms.thirdPartyHeading')}</h2>
+
+    <p>{t('terms.thirdPartyP')}</p>
+
+    <h2>{t('terms.disclaimerHeading')}</h2>
+
+    <p>{t('terms.disclaimerP')}</p>
+
+    <h2>{t('terms.liabilityHeading')}</h2>
+
+    <p>{t('terms.liabilityP')}</p>
+
+    <h2>{t('terms.changesHeading')}</h2>
+
+    <p>{t('terms.changesP')}</p>
+
+    <h2>{t('terms.contactHeading')}</h2>
+
+    <p>{t('terms.contactP')} <a href="mailto:legal@gitsorted.app">legal@gitsorted.app</a>.</p>
+
+  </div>
+</Base>

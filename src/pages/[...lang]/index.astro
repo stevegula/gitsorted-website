@@ -1,0 +1,156 @@
+---
+import Base from '../../layouts/Base.astro';
+import { useTranslations, localePath, getLocaleStaticPaths } from '../../i18n/utils';
+
+export const getStaticPaths = getLocaleStaticPaths;
+
+const t = useTranslations(Astro.currentLocale);
+const locale = Astro.currentLocale ?? 'en';
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "GitSorted",
+  "operatingSystem": "iOS, Android, Chrome, Firefox, Safari, Edge",
+  "applicationCategory": "UtilitiesApplication",
+  "description": "Task lists, shopping lists, and notes backed by git. Your data, your device, your repos.",
+  "offers": [
+    {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD",
+      "name": "Free"
+    },
+    {
+      "@type": "Offer",
+      "price": "4.99",
+      "priceCurrency": "USD",
+      "name": "Pro (one-time)"
+    }
+  ],
+  "featureList": [
+    "Git-backed local storage",
+    "Sync to GitHub, GitLab, Bitbucket, Gitea, Azure Repos, AWS CodeCommit",
+    "Task lists with priorities, deadlines, reminders, and labels",
+    "Shopping lists",
+    "Markdown notes with live preview",
+    "36 languages",
+    "Dark mode and light mode",
+    "Browser extension for Chrome, Firefox, Safari, and Edge",
+    "Custom list types (BYOL) with user-defined schemas"
+  ]
+};
+---
+
+<Base title={t('index.title')}>
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  <div class="max-w-4xl mx-auto px-6 py-20">
+    <section class="text-center mb-20">
+      <h1 class="text-5xl font-bold tracking-tight text-white mb-6" set:html={t('index.heroHeading').replace('\n', '<br />')} />
+      <p class="text-xl text-gray-400 max-w-2xl mx-auto mb-10">
+        {t('index.heroDescription')}
+      </p>
+      <div class="flex justify-center gap-4">
+        <a
+          href="#"
+          class="inline-flex items-center gap-2 bg-white text-gray-950 font-semibold px-6 py-3 rounded-lg hover:bg-gray-200 transition-colors"
+        >
+          {t('index.cta')}
+        </a>
+      </div>
+    </section>
+
+    <section class="mb-20">
+      <h2 class="sr-only">{t('index.featuresHeading')}</h2>
+      <div class="grid md:grid-cols-2 gap-8">
+        <div class="bg-gray-900 rounded-xl p-6 border border-gray-800">
+          <h3 class="text-lg font-semibold text-white mb-2">{t('index.featureDataTitle')}</h3>
+          <p class="text-gray-400">{t('index.featureDataDesc')}</p>
+        </div>
+        <div class="bg-gray-900 rounded-xl p-6 border border-gray-800">
+          <h3 class="text-lg font-semibold text-white mb-2">{t('index.featureSyncTitle')}</h3>
+          <p class="text-gray-400">{t('index.featureSyncDesc')}</p>
+        </div>
+        <div class="bg-gray-900 rounded-xl p-6 border border-gray-800">
+          <h3 class="text-lg font-semibold text-white mb-2">{t('index.featureTasksTitle')}</h3>
+          <p class="text-gray-400">{t('index.featureTasksDesc')}</p>
+        </div>
+        <div class="bg-gray-900 rounded-xl p-6 border border-gray-800">
+          <h3 class="text-lg font-semibold text-white mb-2">{t('index.featureShoppingTitle')}</h3>
+          <p class="text-gray-400">{t('index.featureShoppingDesc')}</p>
+        </div>
+        <div class="bg-gray-900 rounded-xl p-6 border border-gray-800">
+          <h3 class="text-lg font-semibold text-white mb-2">{t('index.featureExtensionTitle')}</h3>
+          <p class="text-gray-400">{t('index.featureExtensionDesc')}</p>
+        </div>
+        <div class="bg-gray-900 rounded-xl p-6 border border-gray-800">
+          <h3 class="text-lg font-semibold text-white mb-2">{t('index.featureByolTitle')} <span class="text-xs font-normal text-yellow-400/80">{t('index.beta')}</span></h3>
+          <p class="text-gray-400">
+            {t('index.featureByolDesc').split('{link}')[0]}
+            <a href={localePath('/byol', locale)} class="text-blue-400 hover:text-blue-300">{t('index.featureByolLink')}</a>
+            {t('index.featureByolDesc').split('{link}')[1]}
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="mb-20">
+      <h2 class="text-2xl font-bold text-white text-center mb-8">{t('index.pricingHeading')}</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-gray-800">
+              <th class="py-3 px-4 text-gray-400 font-medium"></th>
+              <th class="py-3 px-4 text-gray-400 font-medium">{t('index.pricingFree')}</th>
+              <th class="py-3 px-4 text-gray-400 font-medium">{t('index.pricingPro')}</th>
+            </tr>
+          </thead>
+          <tbody class="text-gray-300">
+            <tr class="border-b border-gray-800/50">
+              <td class="py-3 px-4">{t('index.pricingLocalLists')}</td>
+              <td class="py-3 px-4">5</td>
+              <td class="py-3 px-4">{t('index.pricingUnlimited')}</td>
+            </tr>
+            <tr class="border-b border-gray-800/50">
+              <td class="py-3 px-4">{t('index.pricingItemsPerList')}</td>
+              <td class="py-3 px-4">20</td>
+              <td class="py-3 px-4">{t('index.pricingUnlimited')}</td>
+            </tr>
+            <tr class="border-b border-gray-800/50">
+              <td class="py-3 px-4">{t('index.pricingRemoteSync')}</td>
+              <td class="py-3 px-4">{t('index.pricingYes')}</td>
+              <td class="py-3 px-4">{t('index.pricingUnlimited')}</td>
+            </tr>
+            <tr class="border-b border-gray-800/50">
+              <td class="py-3 px-4">{t('index.pricingCredentials')}</td>
+              <td class="py-3 px-4">3</td>
+              <td class="py-3 px-4">{t('index.pricingUnlimited')}</td>
+            </tr>
+            <tr class="border-b border-gray-800/50">
+              <td class="py-3 px-4">{t('index.pricingAllListTypes')}</td>
+              <td class="py-3 px-4">{t('index.pricingYes')}</td>
+              <td class="py-3 px-4">{t('index.pricingYes')}</td>
+            </tr>
+            <tr>
+              <td class="py-3 px-4">{t('index.pricingLabelsPriorities')}</td>
+              <td class="py-3 px-4">{t('index.pricingYes')}</td>
+              <td class="py-3 px-4">{t('index.pricingYes')}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="text-center mb-10">
+      <p class="text-gray-400">
+        {t('index.languageNote')}
+        <br />
+        <span class="text-gray-500 text-sm">
+          {t('index.translationFix').split('{link}')[0]}
+          <a href="https://github.com/stevegula/gitsorted-website/" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300">GitHub</a>
+          {t('index.translationFix').split('{link}')[1]}
+        </span>
+      </p>
+    </section>
+  </div>
+</Base>
