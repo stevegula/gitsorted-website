@@ -9,21 +9,21 @@ title: Privacy Policy — GitSorted
 
 **Effective date:** February 13, 2026
 
-GitSorted is developed by Goshen Cloud Consulting. This policy describes how the GitSorted mobile application handles your data.
+GitSorted is developed by Steve Gula. This policy describes how the GitSorted mobile application handles your data.
 
 ## Data storage
 
-All data you create in GitSorted — task lists, shopping lists, notes, and associated metadata — is stored locally on your device as files within git repositories. GitSorted does not transmit this data to any server operated by Goshen Cloud Consulting.
+All data you create in GitSorted — task lists, shopping lists, notes, and associated metadata — is stored locally on your device as files within git repositories. GitSorted does not transmit this data to any server operated by Steve Gula.
 
 ## Remote sync
 
-If you choose to sync a list with a remote git server (such as GitHub, GitLab, Bitbucket, or another provider), your data is transmitted directly between your device and that third-party server using credentials you provide. Goshen Cloud Consulting does not act as an intermediary and does not have access to your data or credentials.
+If you choose to sync a list with a remote git server (such as GitHub, GitLab, Bitbucket, or another provider), your data is transmitted directly between your device and that third-party server using credentials you provide. Steve Gula does not act as an intermediary and does not have access to your data or credentials.
 
-Your personal access tokens are stored in your device's secure keychain (iOS Keychain / Android Keystore) and are never transmitted to Goshen Cloud Consulting.
+Your personal access tokens are stored in your device's secure keychain (iOS Keychain / Android Keystore) and are never transmitted to Steve Gula.
 
 ## Data we collect
 
-GitSorted does not collect, store, or transmit any personal information to Goshen Cloud Consulting servers. We do not use analytics, tracking, or advertising SDKs.
+GitSorted does not collect, store, or transmit any personal information to Steve Gula servers. We do not use analytics, tracking, or advertising SDKs.
 
 ## Third-party services
 

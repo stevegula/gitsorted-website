@@ -9,7 +9,7 @@ title: Terms of Service — GitSorted
 
 **Effective date:** February 13, 2026
 
-These terms govern your use of the GitSorted mobile application developed by Goshen Cloud Consulting.
+These terms govern your use of the GitSorted mobile application developed by Steve Gula.
 
 ## Acceptance of terms
 
@@ -29,7 +29,7 @@ GitSorted offers a free tier and a Pro upgrade available as a one-time in-app pu
 
 ## Third-party services
 
-GitSorted integrates with third-party git hosting services (GitHub, GitLab, Bitbucket, Gitea, Azure Repos, AWS CodeCommit, and self-hosted servers). Your use of those services is governed by their respective terms and policies. Goshen Cloud Consulting is not responsible for the availability, security, or terms of third-party services.
+GitSorted integrates with third-party git hosting services (GitHub, GitLab, Bitbucket, Gitea, Azure Repos, AWS CodeCommit, and self-hosted servers). Your use of those services is governed by their respective terms and policies. Steve Gula is not responsible for the availability, security, or terms of third-party services.
 
 ## Disclaimer of warranties
 
@@ -37,7 +37,7 @@ GitSorted is provided "as is" without warranty of any kind, express or implied. 
 
 ## Limitation of liability
 
-To the maximum extent permitted by law, Goshen Cloud Consulting shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of GitSorted.
+To the maximum extent permitted by law, Steve Gula shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of GitSorted.
 
 ## Changes to these terms
 
