@@ -5,12 +5,14 @@ import { useTranslations, localePath, localeNames, locales } from '../i18n/utils
 interface Props {
   title: string;
   description?: string;
+  ogImage?: string;
 }
 
 const t = useTranslations(Astro.currentLocale);
 const locale = Astro.currentLocale ?? 'en';
-const { title, description = t('meta.defaultDescription') } = Astro.props;
+const { title, description = t('meta.defaultDescription'), ogImage = '/og-image.png' } = Astro.props;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const ogImageURL = new URL(ogImage, Astro.site).href;
 const currentPath = Astro.url.pathname.replace(new RegExp(`^/${locale === 'en' ? '' : locale}`), '') || '/';
 ---
 
@@ -20,6 +22,17 @@ const currentPath = Astro.url.pathname.replace(new RegExp(`^/${locale === 'en' ?
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL.href} />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content={ogImageURL} />
+    <meta property="og:site_name" content="GitSorted" />
+    <meta property="og:locale" content={locale} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageURL} />
     <link rel="canonical" href={canonicalURL.href} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
@@ -39,6 +52,7 @@ const currentPath = Astro.url.pathname.replace(new RegExp(`^/${locale === 'en' ?
         <div class="flex items-center gap-6 text-sm text-gray-400">
           <a href={localePath('/docs', locale)} class="hover:text-white transition-colors">{t('nav.docs')}</a>
           <a href={localePath('/byol', locale)} class="hover:text-white transition-colors">{t('nav.byol')}</a>
+          <a href={localePath('/changelog', locale)} class="hover:text-white transition-colors">{t('nav.changelog')}</a>
           <a href={localePath('/privacy', locale)} class="hover:text-white transition-colors">{t('nav.privacy')}</a>
           <a href={localePath('/terms', locale)} class="hover:text-white transition-colors">{t('nav.terms')}</a>
           <a href={localePath('/support', locale)} class="hover:text-white transition-colors">{t('nav.support')}</a>

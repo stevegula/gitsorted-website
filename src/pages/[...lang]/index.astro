@@ -141,6 +141,18 @@ const jsonLd = {
       </div>
     </section>
 
+    <section class="mb-16">
+      <div class="flex flex-wrap justify-center gap-4 text-sm">
+        <a href={localePath('/docs', locale)} class="text-blue-400 hover:text-blue-300 transition-colors">{t('index.linkDocs')}</a>
+        <span class="text-gray-700">&middot;</span>
+        <a href={localePath('/byol', locale)} class="text-blue-400 hover:text-blue-300 transition-colors">{t('index.linkByol')}</a>
+        <span class="text-gray-700">&middot;</span>
+        <a href={localePath('/changelog', locale)} class="text-blue-400 hover:text-blue-300 transition-colors">{t('index.linkChangelog')}</a>
+        <span class="text-gray-700">&middot;</span>
+        <a href={localePath('/support', locale)} class="text-blue-400 hover:text-blue-300 transition-colors">{t('index.linkSupport')}</a>
+      </div>
+    </section>
+
     <section class="text-center mb-10">
       <p class="text-gray-400">
         {t('index.languageNote')}

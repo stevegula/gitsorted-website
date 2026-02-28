@@ -1,0 +1,51 @@
+---
+import Base from '../../layouts/Base.astro';
+import { useTranslations, getLocaleStaticPaths } from '../../i18n/utils';
+
+export const getStaticPaths = getLocaleStaticPaths;
+
+const t = useTranslations(Astro.currentLocale);
+
+const releases = [
+  {
+    title: t('changelog.v100Title'),
+    date: t('changelog.v100Date'),
+    features: [
+      t('changelog.v100f1'),
+      t('changelog.v100f2'),
+      t('changelog.v100f3'),
+      t('changelog.v100f4'),
+      t('changelog.v100f5'),
+      t('changelog.v100f6'),
+      t('changelog.v100f7'),
+      t('changelog.v100f8'),
+      t('changelog.v100f9'),
+      t('changelog.v100f10'),
+    ],
+  },
+];
+---
+
+<Base title={t('changelog.title')} description={t('changelog.description')}>
+  <div class="max-w-3xl mx-auto px-6 py-16">
+    <h1 class="text-3xl font-bold text-white mb-3">{t('changelog.heading')}</h1>
+    <p class="text-gray-400 mb-12">{t('changelog.intro')}</p>
+
+    <div class="space-y-12">
+      {releases.map(release => (
+        <section>
+          <h2 class="text-xl font-semibold text-white mb-1">{release.title}</h2>
+          <p class="text-sm text-gray-500 mb-4">{release.date}</p>
+          <ul class="space-y-2 text-gray-400 text-sm">
+            {release.features.map(feature => (
+              <li class="flex gap-2">
+                <span class="text-gray-600 select-none">-</span>
+                <span>{feature}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </div>
+  </div>
+</Base>

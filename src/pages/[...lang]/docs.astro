@@ -1,10 +1,11 @@
 ---
 import Base from '../../layouts/Base.astro';
-import { useTranslations, getLocaleStaticPaths } from '../../i18n/utils';
+import { useTranslations, localePath, getLocaleStaticPaths } from '../../i18n/utils';
 
 export const getStaticPaths = getLocaleStaticPaths;
 
 const t = useTranslations(Astro.currentLocale);
+const locale = Astro.currentLocale ?? 'en';
 
 const repoStructure = `<repo>/
 ├── .git/               # Standard git internals
@@ -101,8 +102,16 @@ const llmContract = `# GitSorted Repository Contract
 <Base title={t('docs.title')} description={t('docs.description')}>
   <div class="max-w-3xl mx-auto px-6 py-16">
     <h1 class="text-3xl font-bold text-white mb-3">{t('docs.heading')}</h1>
-    <p class="text-gray-400 mb-12">
+    <p class="text-gray-400 mb-4">
       {t('docs.intro')}
+    </p>
+    <p class="text-sm text-gray-500 mb-12">
+      {t('docs.seeAlso')}
+      <a href={localePath('/byol', locale)} class="text-blue-400 hover:text-blue-300">{t('nav.byol')}</a>
+      {' | '}
+      <a href={localePath('/changelog', locale)} class="text-blue-400 hover:text-blue-300">{t('nav.changelog')}</a>
+      {' | '}
+      <a href={localePath('/', locale)} class="text-blue-400 hover:text-blue-300">{t('docs.backToHome')}</a>
     </p>
 
     <div class="space-y-16 text-gray-300">
